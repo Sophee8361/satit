@@ -156,6 +156,14 @@ import { Tooltip } from 'primeng/tooltip';
         severity="info"
         [disabled]="!ScheduleData || ScheduleData.length === 0">
       </p-button>
+      <p-button
+        label="พิมพ์ตาราง (Window Print)"
+        icon="pi pi-print"
+        (click)="printWindow()"
+        severity="success"
+        class="ml-2"
+        [disabled]="!ScheduleData || ScheduleData.length === 0">
+      </p-button>
 
 
       <table class="table-auto border-collapse border border-gray-400 w-full text-center mt-4">
@@ -417,4 +425,115 @@ export class ScheduleComponent implements OnInit {
       default: return '#CCCCCC';    // เทา
     }
   }
+
+  printWindow() {
+    if (!this.ScheduleData || this.ScheduleData.length === 0) {
+      this.messageService.add({ severity: 'warn', summary: 'ไม่มีข้อมูล', detail: 'ไม่พบตารางสอนสำหรับตัวเลือกที่กำหนด', life: 3000 });
+      return;
+    }
+
+    const html = `
+<html>
+  <head>
+    <title>ตารางสอน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      @page { size: A4 landscape; margin: 10mm; }
+      body { font-family: 'Sarabun', sans-serif; font-size: 11px; margin: 0; padding: 5px; }
+      h2 { font-size: 16px; text-align: center; margin: 5px 0; }
+      h3 { font-size: 12px; text-align: center; margin: 5px 0; font-weight: normal; }
+
+      table {
+        border-collapse: collapse !important;
+        width: 100%;
+        table-layout: fixed;
+        page-break-inside: auto;
+      }
+
+      tr { page-break-inside: avoid; page-break-after: auto; }
+
+      th, td {
+        border: 1px solid #000 !important;
+        padding: 4px;
+        word-wrap: break-word;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 11px;
+      }
+
+      th { background-color: #eee; font-weight: bold; }
+
+      .highlight { background-color: #60a5fa; color: white; font-weight: bold; }
+
+      .lunch-break {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        background-color: #ffeb99;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+        width: 20px;               /* แคบลง */
+        padding: 2px 0;
+        border: 1px solid #000;    /* ขอบครบทุกด้าน */
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>โรงเรียนสาธิตมหาวิทยาลัยราชภัฏยะลา</h2>
+    <h3>
+      ตารางสอน<br>
+      ปีการศึกษา: ${this.selectedYear || '-'} | ภาคเรียน: ${this.selectedTerm || '-'}<br>
+      ระดับ: ${this.selectedLevel?.name || '-'} | ${this.selectedClass?.name || '-'} | ${this.selectedRoom?.name || '-'}
+    </h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>วัน / เวลา</th>
+          ${this.timeslots.slice(0,4).map(s => `<th>คาบ ${s.TIMESLOTID}<br>${s.SLOTFROM}-${s.SLOTTO}</th>`).join('')}
+          <th class="lunch-break"></th>
+          ${this.timeslots.slice(4).map(s => `<th>คาบ ${s.TIMESLOTID}<br>${s.SLOTFROM}-${s.SLOTTO}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${this.days.map((day, di) => `
+          <tr>
+            <td>${day.name}</td>
+            ${this.timeslots.slice(0,4).map(slot => {
+      const sch = this.ScheduleData.find(s => s.DAYID === day.code && s.TIMESLOTID === slot.TIMESLOTID);
+      return `<td${sch ? ' class="highlight"' : ''}>${sch ? `${sch.COURSENAME}<br>${sch.STAFFNAME} ${sch.STAFFSERNAME}` : ''}</td>`;
+    }).join('')}
+            ${di === 0 ? `<td rowspan="${this.days.length}" class="lunch-break">พักกลางวัน</td>` : ''}
+            ${this.timeslots.slice(4).map(slot => {
+      const sch = this.ScheduleData.find(s => s.DAYID === day.code && s.TIMESLOTID === slot.TIMESLOTID);
+      return `<td${sch ? ' class="highlight"' : ''}>${sch ? `${sch.COURSENAME}<br>${sch.STAFFNAME} ${sch.STAFFSERNAME}` : ''}</td>`;
+    }).join('')}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </body>
+</html>
+  `;
+
+    const printWindow = window.open('', '', 'width=1200,height=800');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.document.fonts.ready.then(() => {
+        printWindow.focus();
+        printWindow.print();
+      });
+    }
+  }
+
+
+
+
+
+
+
+
+
 }

@@ -32,9 +32,14 @@ export default [
     data: {breadcrumb: 'ตารางสอน'}
   },
   {
-    path: 'chkschedule',
+    path: 'repplacschedule',
     loadComponent: () => import('./chekschedule').then((c) => c.CheckScheduleComponent),
     data: {breadcrumb: 'ตารางสอนแทน'}
+  },
+  {
+    path: 'app',
+    loadComponent: () => import('./chekschedule').then((c) => c.CheckScheduleComponent),
+    data: {breadcrumb: 'App'}
   }
 
   // {

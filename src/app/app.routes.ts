@@ -22,7 +22,7 @@ export const routes: Routes = [
         data: {breadcrumb: 'ระเบียนประวัติ'}
       },
       {
-        path: 'times',
+        path: 'time',
         canActivate: [AuthGuard],
         loadChildren: () => import('./time/time.routes'),
         data: {breadcrumb: 'ตารางเรียน'}

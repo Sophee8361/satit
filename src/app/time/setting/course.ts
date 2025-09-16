@@ -168,65 +168,76 @@ import { InputIcon } from 'primeng/inputicon';
       header="{{ isEditMode ? 'แก้ไขวิชา' : 'เพิ่มข้อมูลวิชาเรียนใหม่' }}"
       [modal]="true"
       [(visible)]="visibleAddDialog"
-      [style]="{ width: '50rem', height: '26rem' }"
+      [style]="{ width: '40rem' }"
       [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+      styleClass="rounded-xl shadow-2xl"
     >
-      <div class="p-fluid grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="p-6">
+        <div class="p-fluid grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- รหัสวิชา -->
-        <div class="field col-span-1">
-          <label for="new_subject_code" class="font-semibold text-gray-700 block mb-1">รหัสวิชา:</label>
-          <input pInputText id="new_subject_code" [(ngModel)]="newSubjectCode" class="w-full" />
+          <div class="field">
+            <label for="new_subject_code" class="font-semibold text-gray-700 block mb-2 text-sm">รหัสวิชา</label>
+            <input
+              pInputText
+              id="new_subject_code"
+              [(ngModel)]="newSubjectCode"
+              class="w-full"
+              placeholder="กรอกรหัสวิชา"
+            />
+          </div>
+
+          <div class="field">
+            <label for="new_subject_name" class="font-semibold text-gray-700 block mb-2 text-sm">ชื่อวิชา</label>
+            <input
+              pInputText
+              id="new_subject_name"
+              [(ngModel)]="newSubjectName"
+              class="w-full"
+              placeholder="กรอกชื่อวิชา"
+            />
+          </div>
+
+          <div class="field md:col-span-2">
+            <label for="groupcourse" class="font-semibold text-gray-700 block mb-2 text-sm">กลุ่มรายวิชา</label>
+            <p-dropdown
+              [options]="groupcourse"
+              optionLabel="groupName"
+              optionValue="groupId"
+              [(ngModel)]="selectedGroup"
+              placeholder="-- เลือกกลุ่มรายวิชา --"
+              class="w-full"
+            ></p-dropdown>
+          </div>
+
+          <div class="field md:col-span-2">
+            <label for="new_unit" class="font-semibold text-gray-700 block mb-2 text-sm">จำนวน (ชม.)</label>
+            <p-inputNumber
+              mode="decimal"
+              inputId="new_unit"
+              [useGrouping]="false"
+              [(ngModel)]="newUnit"
+              class="w-full"
+              placeholder="กรอกจำนวนชั่วโมง"
+            ></p-inputNumber>
+          </div>
+
         </div>
-
-        <!-- ชื่อวิชา -->
-        <div class="field col-span-1">
-          <label for="new_subject_name" class="font-semibold text-gray-700 block mb-1">ชื่อวิชา:</label>
-          <input pInputText id="new_subject_name" [(ngModel)]="newSubjectName" class="w-full" />
-        </div>
-
-        <!-- กลุ่มรายวิชา -->
-        <div class="field col-span-1">
-          <label for="groupcourse" class="font-semibold text-gray-700 block mb-1">กลุ่มรายวิชา:</label>
-          <p-dropdown
-            [options]="groupcourse"
-            optionLabel="groupName"
-            optionValue="groupId"
-            [(ngModel)]="selectedGroup"
-            placeholder="-- เลือกกลุ่มรายวิชา --"
-            class="w-full"
-          ></p-dropdown>
-        </div>
-
-        <!-- หน่วยชม. -->
-        <div class="field col-span-1">
-          <label for="new_unit" class="font-semibold text-gray-700 block mb-1">จำนวน ชม.:</label>
-          <p-inputNumber
-            mode="decimal"
-            inputId="new_unit"
-            [useGrouping]="false"
-            [(ngModel)]="newUnit"
-            class="w-full"
-          ></p-inputNumber>
-        </div>
-
-
       </div>
-
       <ng-template pTemplate="footer">
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-3 px-6 py-4">
           <p-button
             label="ยกเลิก"
             icon="pi pi-times"
             (click)="visibleAddDialog=false"
             severity="secondary"
-            class="p-button-outlined"
+            styleClass="p-button-outlined p-button-sm"
           ></p-button>
           <p-button
             label="บันทึก"
             icon="pi pi-check"
             (click)="saveSubject()"
             severity="primary"
+            styleClass="p-button-sm"
           ></p-button>
         </div>
       </ng-template>

@@ -113,17 +113,17 @@ export class AppMenu {
         {
           label: 'จัดผู้สอน',
           icon: 'pi pi-user-edit',   // 👨‍🏫 เหมาะกับการกำหนด/แก้ไขครูผู้สอน
-          routerLink: ['/times/staff']
+          routerLink: ['/time/staff']
         },
         {
           label: 'จัดตารางสอน',
           icon: 'pi pi-calendar',   // 📅 เหมาะกับการวางตารางสอน
-          routerLink: ['/times/time']
+          routerLink: ['/time/time']
         },
         {
           label: 'จัดตารางสอนแทน',
-          icon: 'pi pi-pencil',
-          routerLink: '/times/chkschedule',
+          icon: 'pi pi-calendar',   // 📅 เหมาะกับการวางตารางสอน
+          routerLink: ['/time/repplacschedule']
         },
         {
           label: 'รายงาน',
@@ -132,10 +132,11 @@ export class AppMenu {
             {
               label: 'ตารางสอน',
               icon: 'pi pi-calendar', // Changed from pi-time-edit
-              routerLink: ['/times/schedule']
+              routerLink: ['/time/schedule']
             }
           ]
         },
+
 
 
         {
@@ -145,22 +146,22 @@ export class AppMenu {
             {
               label: 'คาบเรียน',
               icon: 'pi pi-clock',   // ⏰ เหมาะกับเวลา/คาบเรียน
-              routerLink: ['/times/slot']
+              routerLink: ['/time/slot']
             },
             {
               label: 'กลุ่มวิชา',
               icon: 'pi pi-book',   // 📚 เหมาะกับวิชา/การเรียน
-              routerLink: ['/times/course']
+              routerLink: ['/time/course']
             },
             {
               label: 'อาจารย์ประจำชั้น',
               icon: 'pi pi-users',   // 👨‍🏫👩‍🏫 เหมาะกับครู/ผู้สอน
-              routerLink: ['/times/staffs']
+              routerLink: ['/time/staffs']
             },
             {
               label: 'ครูผู้สอน',
               icon: 'pi pi-users',   // 👨‍🏫👩‍🏫 เหมาะกับครู/ผู้สอน
-              routerLink: ['/times/teacher']
+              routerLink: ['/time/teacher']
             }
           ]
         },

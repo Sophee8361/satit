@@ -77,66 +77,79 @@ import { Calendar } from 'primeng/calendar';
           dateFormat="dd/mm/yy"
           placeholder="เลือกวันที่">
         </p-datepicker>
-
-
         <!-- ✅ ปุ่มเปิด Dialog A4 -->
         <button pButton type="button" label="รายงาน" icon="pi pi-print" (click)="loadReport()"></button>
       </div>
-
-
-
-      <div class="table-wrapper shadow-lg rounded-xl" *ngIf="timeslots.length && scheduleData.length">
-        <table class="schedule-table">
-          <thead>
-          <tr class="header-row">
-            <th rowspan="2" class="sticky-col">
-              👨‍🏫 ผู้สอน / คาบ
+      <div class="table-wrapper relative overflow-x-auto shadow-xl rounded-2xl border border-gray-200" *ngIf="timeslots.length && scheduleData.length">
+        <table class="schedule-table w-full text-center border-collapse">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+          <tr class="text-sm font-semibold text-gray-700">
+            <th rowspan="2" class="sticky-col py-4 px-3 border-r border-gray-200">
+              <div class="flex items-center justify-center space-x-2">
+                <span class="text-xl">👨‍🏫</span>
+                <span>ผู้สอน / คาบ</span>
+              </div>
             </th>
-            <th [attr.colspan]="timeslots.slice(0,4).length">
+            <th [attr.colspan]="timeslots.slice(0,4).length" class="py-2 px-3 border-b border-gray-200 bg-yellow-100 text-yellow-800">
               🌅 คาบเช้า
             </th>
-            <th rowspan="2" class="lunch-break">🍴 พัก</th>
-            <th [attr.colspan]="timeslots.slice(4).length">
+            <th rowspan="2" class="lunch-break min-w-[50px] bg-sky-100 text-sky-800 font-bold border-l border-r border-sky-200">
+              🍴 พัก
+            </th>
+            <th [attr.colspan]="timeslots.slice(4).length" class="py-2 px-3 border-b border-gray-200 bg-orange-100 text-orange-800">
               🌇 คาบบ่าย
             </th>
           </tr>
-
-          <tr class="sub-header-row">
-            <th *ngFor="let slot of timeslots.slice(0,4)">
-              📅 คาบ {{ slot.TIMESLOTID }}<br>
-              <small>{{ slot.SLOTFROM }} - {{ slot.SLOTTO }}</small>
-            </th>
-            <th *ngFor="let slot of timeslots.slice(4)">
-              📅 คาบ {{ slot.TIMESLOTID }}<br>
-              <small>{{ slot.SLOTFROM }} - {{ slot.SLOTTO }}</small>
-            </th>
+          <tr class="text-xs text-gray-500 font-medium">
+            <ng-container *ngFor="let slot of timeslots.slice(0,4)">
+              <th class="py-2 px-1 border-r border-gray-100">
+                <div>คาบ {{ slot.TIMESLOTID }}</div>
+                <div class="font-normal">{{ slot.SLOTFROM }} - {{ slot.SLOTTO }}</div>
+              </th>
+            </ng-container>
+            <ng-container *ngFor="let slot of timeslots.slice(4)">
+              <th class="py-2 px-1 border-l border-gray-100">
+                <div>คาบ {{ slot.TIMESLOTID }}</div>
+                <div class="font-normal">{{ slot.SLOTFROM }} - {{ slot.SLOTTO }}</div>
+              </th>
+            </ng-container>
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let row of scheduleData; let ri = index">
-            <td class="teacher-name sticky-col">{{ row.officer.FULLNAME }}</td>
-            <td *ngFor="let slot of timeslots.slice(0,4)"
-                [ngClass]="[getSlotClass(row, slot.TIMESLOTID), row.slots[slot.TIMESLOTID] ? 'clickable-slot' : '']"
+          <tr *ngFor="let row of scheduleData; let ri = index" class="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-200">
+            <td class="teacher-name sticky-col py-3 px-4 text-left font-medium text-gray-800 bg-white border-r border-gray-200">
+              {{ row.officer.FULLNAME }}
+            </td>
+            <ng-container *ngFor="let slot of timeslots.slice(0,4)">
+              <td
+                class="py-3 px-2 border-r border-gray-100 text-sm"
+                [ngClass]="[getSlotClass(row, slot.TIMESLOTID), row.slots[slot.TIMESLOTID] ? 'clickable-slot cursor-pointer transition-all duration-200 hover:scale-105' : '']"
                 (click)="row.slots[slot.TIMESLOTID] && openDialog(row, slot)">
-              {{ row.slots[slot.TIMESLOTID] }}
+                {{ row.slots[slot.TIMESLOTID] }}
+              </td>
+            </ng-container>
+
+            <td *ngIf="ri === 0" class="lunch-break text-lg text-sky-700 font-semibold bg-sky-50" [attr.rowspan]="scheduleData.length">
+              <div class="flex flex-col items-center justify-center p-2">
+                <span class="text-2xl">☕️</span>
+                <span class="mt-1">พัก</span>
+              </div>
             </td>
 
-            <!-- พักกลางวัน -->
-            <td *ngIf="ri === 0" class="lunch-break" [attr.rowspan]="scheduleData.length">
-              <span>🍴 พัก ☕️</span>
-            </td>
-
-            <td *ngFor="let slot of timeslots.slice(4)"
-                [ngClass]="[getSlotClass(row, slot.TIMESLOTID), row.slots[slot.TIMESLOTID] ? 'clickable-slot' : '']"
+            <ng-container *ngFor="let slot of timeslots.slice(4)">
+              <td
+                class="py-3 px-2 border-l border-gray-100 text-sm"
+                [ngClass]="[getSlotClass(row, slot.TIMESLOTID), row.slots[slot.TIMESLOTID] ? 'clickable-slot cursor-pointer transition-all duration-200 hover:scale-105' : '']"
                 (click)="row.slots[slot.TIMESLOTID] && openDialog(row, slot)">
-              {{ row.slots[slot.TIMESLOTID] }}
-            </td>
-
-
+                {{ row.slots[slot.TIMESLOTID] }}
+              </td>
+            </ng-container>
           </tr>
           </tbody>
         </table>
       </div>
+
+
     </div>
     <!-- Legend Section -->
     <div class="mt-4 flex items-center space-x-6 text-sm" *ngIf="timeslots.length && scheduleData.length">
@@ -158,91 +171,96 @@ import { Calendar } from 'primeng/calendar';
       header="📘 รายละเอียดรายวิชา"
       [(visible)]="displayDialog"
       [modal]="true"
-      [style]="{width: '650px', height: '670px'}"
+      [style]="{width: '650px', height: 'auto'}"
       [dismissableMask]="true"
       [draggable]="false"
+      styleClass="rounded-xl overflow-hidden shadow-2xl"
     >
       <ng-container *ngIf="selectedCourse">
-        <div class="p-3 space-y-4">
-          <!-- วัน + คาบ อยู่แถวเดียว -->
-          <div class="flex gap-4">
-            <!-- วัน -->
-            <div class="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 shadow-sm flex-1">
-              <i class="pi pi-calendar text-yellow-500 text-lg"></i>
-              <div>
-                <div class="text-sm text-yellow-600">วัน</div>
-                <div class="font-medium text-yellow-800">
-                  {{ selectedCourse.day }}
-                </div>
-              </div>
+        <div class="p-6 space-y-6">
+
+          <header class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">
+              {{ selectedCourse.course }}
+            </h2>
+            <p class="text-lg text-gray-600">
+              {{ formatClass(selectedCourse.className, selectedCourse.room) }}
+            </p>
+          </header>
+          <hr class="border-gray-200">
+          <div class="space-y-4">
+            <div class="p-4 rounded-lg bg-orange-50 shadow-sm border border-orange-200">
+              <label class="font-semibold text-orange-700 flex items-center gap-2 mb-2">
+                <i class="pi pi-users text-orange-500 text-lg"></i>
+                เลือกผู้สอนแทน
+              </label>
+              <p-dropdown
+                [options]="officers"
+                optionLabel="FULLNAME"
+                optionValue="STAFFID"
+                [filter]="true"
+                [(ngModel)]="substituteTeacher"
+                placeholder="เลือกผู้สอนแทน"
+                styleClass="w-full"
+                filterPlaceholder="ค้นหาผู้สอน..."
+                [showClear]="true"
+              ></p-dropdown>
             </div>
-
-            <!-- คาบ -->
-            <div class="flex items-center gap-2 p-3 rounded-lg bg-green-50 shadow-sm flex-1">
-              <i class="pi pi-clock text-green-500 text-lg"></i>
-              <div>
-                <div class="text-sm text-green-600">คาบ</div>
-                <div class="font-medium text-green-800">
-                  {{ selectedCourse.slot.TIMESLOTID }}
-                  <span class="text-xs text-green-700">
-                    ({{ selectedCourse.slot.SLOTFROM }} - {{ selectedCourse.slot.SLOTTO }})
-                  </span>
-                </div>
-              </div>
-            </div>
-            <!-- ผู้สอน -->
-            <div class="flex flex-col gap-1 p-3 rounded-lg bg-blue-50 shadow-sm">
-
-              <div class="text-sm text-blue-600">CLASSID: {{ selectedCourse.classid }}</div>
-            </div>
-
-          </div>
-
-          <!-- รายวิชา -->
-          <div class="flex items-center gap-2 p-3 rounded-lg bg-purple-50 shadow-sm">
-            <i class="pi pi-book text-purple-500 text-lg"></i>
-            <div>
-              <div class="text-sm text-purple-600">รายวิชา</div>
-              <div class="font-medium text-purple-800">
-                {{ selectedCourse.course }}
-              </div>
-            </div>
-          </div>
-
-          <!-- ผู้สอน -->
-          <div class="flex items-center gap-2 p-3 rounded-lg bg-blue-50 shadow-sm">
-            <i class="pi pi-user text-blue-500 text-lg"></i>
-            <div>
-              <div class="text-sm text-blue-600">ผู้สอนเดิม</div>
-              <div class="font-semibold text-blue-800">
+            <div class="p-4 rounded-lg bg-gray-50 shadow-sm border border-gray-200">
+              <label class="text-sm text-gray-600 flex items-center gap-2">
+                <i class="pi pi-user text-gray-500 text-lg"></i>
+                ผู้สอนเดิม
+              </label>
+              <div class="font-semibold text-xl text-gray-800 mt-2">
                 {{ selectedCourse.officer.FULLNAME }}
               </div>
             </div>
           </div>
+          <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-          <!-- เลือกผู้สอนแทน -->
-          <div class="flex flex-col gap-2 p-3 rounded-lg bg-orange-50 shadow-sm">
-            <label class="font-semibold text-orange-700 flex items-center gap-2">
-              <i class="pi pi-users text-orange-500 text-lg"></i>
-              เลือกผู้สอนแทน
-            </label>
-            <p-dropdown
-              [options]="officers"
-              optionLabel="FULLNAME"
-              optionValue="STAFFID"
-              [filter]="true"
-              [(ngModel)]="substituteTeacher"
-              placeholder="เลือกผู้สอนแทน"
-              styleClass="w-full"
-            ></p-dropdown>
-          </div>
+            <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-yellow-50 shadow-sm border border-yellow-200 text-center">
+              <i class="pi pi-calendar text-yellow-500 text-2xl mb-2"></i>
+              <span class="text-sm font-medium text-yellow-600">วัน</span>
+              <div class="font-semibold text-xl text-yellow-800 mt-1">
+                {{ selectedCourse.day }}
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-green-50 shadow-sm border border-green-200 text-center">
+              <i class="pi pi-clock text-green-500 text-2xl mb-2"></i>
+              <span class="text-sm font-medium text-green-600">คาบ</span>
+              <div class="font-semibold text-xl text-green-800 mt-1">
+                {{ selectedCourse.slot.TIMESLOTID }}
+              </div>
+              <div class="text-sm text-green-700 mt-1">
+                ({{ selectedCourse.slot.SLOTFROM }} - {{ selectedCourse.slot.SLOTTO }})
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-blue-50 shadow-sm border border-blue-200 text-center">
+              <i class="pi pi-qrcode text-blue-500 text-2xl mb-2"></i>
+              <span class="text-sm font-medium text-blue-600">รหัสชั้นเรียน</span>
+              <div class="font-semibold text-xl text-blue-800 mt-1">
+                {{ selectedCourse.classid }}
+              </div>
+            </div>
+
+          </section>
+
 
         </div>
       </ng-container>
 
-      <!-- Footer -->
       <ng-template pTemplate="footer">
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-3 mt-4">
+          <button
+            pButton
+            type="button"
+            label="ยกเลิก"
+            icon="pi pi-times"
+            (click)="displayDialog=false"
+            class="p-button-secondary p-button-sm p-button-text"
+          ></button>
           <button
             pButton
             type="button"
@@ -250,15 +268,7 @@ import { Calendar } from 'primeng/calendar';
             icon="pi pi-check"
             (click)="saveSubstitute()"
             [disabled]="!substituteTeacher"
-            class="p-button-success"
-          ></button>
-          <button
-            pButton
-            type="button"
-            label="ยกเลิก"
-            icon="pi pi-times"
-            (click)="displayDialog=false"
-            class="p-button-secondary"
+            class="p-button-success p-button-sm"
           ></button>
         </div>
       </ng-template>
@@ -622,14 +632,27 @@ export class CheckScheduleComponent implements OnInit {
             f.DAYNAME === this.selectedDay.name &&
             f.TIMESLOTID == slot.TIMESLOTID
         );
-        row.slots[slot.TIMESLOTID] = sch ? `${sch.COURSENAME} (${sch.CLASS})` : '';
+
+        if (sch) {
+          let className = sch.CLASS;
+          if (className) {
+            const level = className.substring(1); // เอาตัวเลข เช่น P1 → 1
+            if (className.startsWith('P')) {
+              className = `ป.${level}/${sch.ROOM || ''}`;
+            } else if (className.startsWith('M')) {
+              className = `ม.${level}/${sch.ROOM || ''}`;
+            }
+          }
+          row.slots[slot.TIMESLOTID] = `${sch.COURSENAME} (${className})`;
+        } else {
+          row.slots[slot.TIMESLOTID] = '';
+        }
       });
       return row;
     });
 
     this.cd.detectChanges();
   }
-
 
 
 
@@ -661,7 +684,8 @@ export class CheckScheduleComponent implements OnInit {
       day: sch.DAYNAME,
       classid: sch.CLASSID,
       staffid: sch.STAFFID,
-      className: sch.CLASS
+      className: sch.CLASS,
+      room: sch.ROOM
     };
     this.displayDialog = true;
   }
@@ -709,6 +733,23 @@ export class CheckScheduleComponent implements OnInit {
     const year = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
     return `วันที่ ${day} เดือน${month} พ.ศ. ${year}`;
   }
+
+  formatClass(classCode: string, room?: string): string {
+    if (!classCode) return '';
+
+    let level = classCode;
+
+    if (classCode.startsWith('P')) {
+      level = `ป.${classCode.substring(1)}`;
+    } else if (classCode.startsWith('M')) {
+      level = `ม.${classCode.substring(1)}`;
+    } else if (classCode.startsWith('K')) {
+      level = `อ.${classCode.substring(1)}`;
+    }
+
+    return room ? `${level}/${room}` : level;
+  }
+
 
 
   loadReport() {
