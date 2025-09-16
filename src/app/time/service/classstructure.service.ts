@@ -1,0 +1,41 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ClassStructure } from './model/classtime.model'; // Import SlotModel interface
+
+@Injectable({
+  providedIn: 'root' // กำหนดให้ Service นี้สามารถ Inject ได้ทั่วทั้งแอปพลิเคชัน
+})
+export class ClassstructureService  {
+  // กำหนด Base URL สำหรับ API ของ Time Service
+  private apiUrl = 'https://api-eduservice.yru.ac.th/satit/time/classstructure.php';
+  // private apiUrl = 'https://api-eduservice.yru.ac.th/satit/times/index.php'; // อีก URL ที่อาจใช้ได้ (คอมเมนต์ไว้)
+
+  // getAuthHeaders: ฟังก์ชันสำหรับสร้าง HTTP Headers พร้อม Basic Authentication
+  private getAuthHeaders(): HttpHeaders {
+    const username = 'admin'; // <-- ชื่อผู้ใช้สำหรับ Basic Auth (ควรเปลี่ยนให้ปลอดภัยใน Production)
+    const password = '1234'; // <-- รหัสผ่านสำหรับ Basic Auth (ควรเปลี่ยนให้ปลอดภัยใน Production)
+    return new HttpHeaders({
+      // เข้ารหัส username:password เป็น Base64 สำหรับ Basic Authentication
+      Authorization: 'Basic ' + btoa(`${username}:${password}`),
+      'Content-Type': 'application/json' // กำหนด Content-Type เป็น JSON
+    });
+  }
+  // Constructor: Inject HttpClient เพื่อใช้ในการเรียก API
+  constructor(private http: HttpClient) {}
+  // getSlot: เมธอดสำหรับดึงข้อมูล Slot ทั้งหมด
+  // คืนค่าเป็น Observable ของ Array ของ SlotModel
+  getSlot(): Observable<ClassStructure[]> {
+    return this.http.get<ClassStructure[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  // deleteSlot: เมธอดสำหรับลบข้อมูล Slot
+  // รับ id ของ Slot ที่ต้องการลบ และส่งเป็น DELETE request
+  // ตัวอย่าง URL ที่จะถูกสร้าง: https://api-eduservice.yru.ac.th/satit/time/time.php?id=YOUR_TIMESLOT_ID
+  deleteClassstructure(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}?id=${id}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+}

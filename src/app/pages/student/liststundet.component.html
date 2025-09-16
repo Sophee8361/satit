@@ -1,0 +1,141 @@
+<div class="col-span-12 md:col-span-7 xl:col-span-9 space-y-4">
+  <div class="card">
+
+    <p-toolbar styleClass="mb-12">
+      <ng-template #start>
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <!--        <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedStudents || !selectedStudents.length" />-->
+      </ng-template>
+
+      <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+      </ng-template>
+    </p-toolbar>
+    <p-table #dt [value]="students()" [rows]="10" [columns]="cols" [paginator]="true"
+             [globalFilterFields]="filterFields" [tableStyle]="{ 'min-width': '75rem' }" [(selection)]="selectedStudents"
+             [rowHover]="true" dataKey="STUDENTID"
+             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} students" [showCurrentPageReport]="true"
+             [rowsPerPageOptions]="[10, 20, 30]">
+      <ng-template #caption>
+        <div class="flex items-center justify-between">
+
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input pInputText type="text"  (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+          </p-iconfield>
+        </div>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox />
+          </th>
+          <th style="min-width: 16rem" pSortableColumn="STUDENTCODE">
+                    <span class="flex items-center gap-2">รหัสนักเรียน
+                        <p-sortIcon field="STUDENTCODE" /></span>
+          </th>
+          <th pSortableColumn="NAME" style="min-width:16rem">
+                    <span class="flex items-center gap-2">ชื่อ-นามสกุล
+                        <p-sortIcon field="NAME" /></span>
+          </th>
+          <th pSortableColumn="PROGRAMNAME" style="min-width: 8rem">
+                    <span class="flex items-center gap-2">ระดับชั้น
+                        <p-sortIcon field="PROGRAMNAME" /></span>
+          </th>
+          <th pSortableColumn="FINANCESTATUS" style="min-width: 12rem">
+                    <span class="flex items-center gap-2">ภาระหนี้
+                        <p-sortIcon field="FINANCESTATUS" /></span>
+          </th>
+          <th pSortableColumn="STUDENTSTATUS" style="min-width: 12rem">
+                    <span class="flex items-center gap-2">สถานะนักเรียน
+                        <p-sortIcon field="STUDENTSTATUS" /></span>
+          </th>
+          <th style="min-width: 12rem"></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-student>
+        <tr>
+          <td style="width: 3rem">
+            <p-tableCheckbox [value]="student" />
+          </td>
+          <td style="min-width: 12rem">{{ student.STUDENTCODE }}</td>
+          <td style="min-width: 16rem">{{ student.NAME }}</td>
+
+          <td>{{ student.PROGRAMNAME }}</td>
+
+          <!-- <td>
+              <p-rating [(ngModel)]="student.rating" [readonly]="true" />
+          </td> -->
+          <td>
+            <p-tag [value]="student.FINANCESTATUS" [severity]="getfinance(student.FN)" />
+          </td>
+          <td>
+            <p-tag [value]="student.ST" [severity]="getSeverity(student.STUDENTSTATUS)" />
+          </td>
+          <td>
+            <p-button icon="pi pi-pencil" severity="info" class="mr-2" rounded (click)="editProduct(student)"/>
+            <p-button icon="pi pi-eye" severity="success" class="mr-2" rounded (click)="viewStudent(student)" />
+            <!-- <p-button icon="pi pi-eye" text raised class="mr-2" [rounded]="true" [outlined]="true"
+                (click)="viewStudent(student)" /> -->
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [(visible)]="productDialog" [style]="{ width: '90vw', maxWidth: '750px' }" header="ข้อมูลนักเรียน" [modal]="true">
+  <ng-template #content>
+    <div class="flex flex-col gap-6">
+      <div>
+        <label for="name" class="block font-bold mb-4">รหัสนักเรียน</label>
+        <input type="text" pInputText id="name" [(ngModel)]="student.STUDENTID" required autofocus fluid
+               readonly />
+        <small class="text-red-500"
+               *ngIf="submitted && !student.STUDENTCODE">รหัสนักเรียนเป็นข้อมูลที่จำเป็น</small>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="email2">คำนำหน้า</label>
+            <p-select [(ngModel)]="student.PREFIXID" inputId="PREFIXID" [options]="prefixes"
+                      optionLabel="PREFIXNAME" optionValue="PREFIXID" placeholder="Select a Prefix" fluid />
+          </div>
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="studentName">ชื่อ</label>
+            <input type="text" pInputText id="studentName" [(ngModel)]="student.STUDENTNAME" required
+                   autofocus fluid />
+          </div>
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="studentSurname">นามสกุล</label>
+            <input type="text" pInputText id="studentSurname" [(ngModel)]="student.STUDENTSURNAME" required
+                   autofocus fluid />
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="Prefix">Prefix</label>
+            <p-select [(ngModel)]="student.PREFIXID" inputId="PREFIXID" [options]="prefixes"
+                      optionLabel="PREFIXNAMEENG" optionValue="PREFIXID" placeholder="Select a Prefix" fluid />
+          </div>
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="studentNameeng">Name</label>
+            <input type="text" pInputText id="studentNameeng" [(ngModel)]="student.STUDENTNAMEENG" required
+                   autofocus fluid />
+          </div>
+          <div class="flex flex-col grow basis-0 gap-2">
+            <label for="studentSurnameeng">SurName</label>
+            <input type="text" pInputText id="studentSurnameeng" [(ngModel)]="student.STUDENTSURNAMEENG"
+                   required autofocus fluid />
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #footer>
+    <p-button label="Cancel" icon="pi pi-times" severity="secondary" text (click)="hideDialog()" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (click)="saveStudent()" />
+  </ng-template>
+</p-dialog>
+<p-confirmdialog [style]="{ width: '450px' }" />
+

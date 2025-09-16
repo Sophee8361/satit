@@ -1,0 +1,12 @@
+[
+  { "code": "00", "name": "No Religion", "nameTh": "ไม่นับถือศาสนาใด" },
+  { "code": "01", "name": "Buddhism", "nameTh": "ศาสนาพุทธ" },
+  { "code": "02", "name": "Islam", "nameTh": "ศาสนาอิสลาม" },
+  { "code": "03", "name": "Hinduism", "nameTh": "ศาสนาฮินดู" },
+  { "code": "04", "name": "Judaism", "nameTh": "ศาสนายิว" },
+  { "code": "05", "name": "Sikhism", "nameTh": "ศาสนาซิกข์" },
+  { "code": "06", "name": "Christianity", "nameTh": "ศาสนาคริสต์" },
+  { "code": "07", "name": "Jainism", "nameTh": "ศาสนาเชน" },
+  { "code": "08", "name": "Zoroastrianism", "nameTh": "ศาสนาโซโรอัสเตอร์" },
+  { "code": "09", "name": "Bahá'í Faith", "nameTh": "ศาสนาบาไฮ" }
+]
