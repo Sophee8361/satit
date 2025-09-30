@@ -15,12 +15,13 @@ import { OfficerModel } from './service/model/officer.model';
 import { DAYS } from './service/time.constant';
 import { ButtonDirective } from 'primeng/button';
 import { Calendar } from 'primeng/calendar';
+import { RadioButton } from 'primeng/radiobutton';
 
 
 @Component({
   selector: 'app-check-schedule',
   standalone: true,
-  imports: [FormsModule, DropdownModule, Toast, CommonModule, Dialog, ButtonDirective, Calendar, DatePickerModule],
+  imports: [FormsModule, DropdownModule, Toast, CommonModule, Dialog, ButtonDirective, Calendar, DatePickerModule, RadioButton],
   providers: [MessageService],
   template: `
     <p-toast position="top-right"></p-toast>
@@ -205,7 +206,39 @@ import { Calendar } from 'primeng/calendar';
                 filterPlaceholder="ค้นหาผู้สอน..."
                 [showClear]="true"
               ></p-dropdown>
+
+              <!-- 📝 หมายเหตุ -->
+              <div class="mt-4">
+                <label class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                  <i class="pi pi-comment text-gray-500"></i>
+                  หมายเหตุ
+                </label>
+                <div class="flex flex-col gap-2">
+                  <div *ngFor="let option of substituteNoteOptions">
+                    <p-radioButton
+                      name="note"
+                      [value]="option"
+                      [(ngModel)]="substituteNote"
+                      inputId="{{ option }}" />
+                    <label for="{{ option }}" class="ml-2 cursor-pointer">
+                      {{ option }}
+                    </label>
+                  </div>
+
+                  <!-- แสดง textbox ก็ต่อเมื่อเลือก "อื่น ๆ" -->
+                  <input
+                    *ngIf="substituteNote === 'อื่น ๆ'"
+                    type="text"
+                    [(ngModel)]="customNote"
+                    placeholder="โปรดระบุ..."
+                    class="p-inputtext p-component w-full mt-2"
+                    required
+                  />
+                </div>
+              </div>
             </div>
+
+
             <div class="p-4 rounded-lg bg-gray-50 shadow-sm border border-gray-200">
               <label class="text-sm text-gray-600 flex items-center gap-2">
                 <i class="pi pi-user text-gray-500 text-lg"></i>
@@ -296,7 +329,7 @@ import { Calendar } from 'primeng/calendar';
           <thead>
           <tr>
             <th style="width:40px;">ลำดับที่</th>
-            <th>ผู้สอนต้องการจัดสอนแทน</th>
+            <th>ผู้สอน</th>
             <th style="width:40px;">คาบที่</th>
             <th>รายวิชา</th>
             <th>ชั้น</th>
@@ -307,11 +340,12 @@ import { Calendar } from 'primeng/calendar';
           <tbody>
           <tr *ngFor="let row of reportData; let i = index">
             <td style="width:40px;">{{ i + 1 }}</td>
-            <td>{{ row.MASTER_PREFIX }}{{ row.MASTER_NAME }} {{ row.MASTER_SURNAME }}</td>
+            <td>{{ row.REPLACE_PREFIX }}{{ row.REPLACE_NAME }} {{ row.REPLACE_SURNAME }}</td>
+
             <td style="width:40px;">{{ row.TIMESLOT_NAME }}</td>
             <td>{{ row.COURSENAME }}</td>
             <td>{{ row.CLASS_ROOM }}</td>
-            <td>{{ row.REPLACE_PREFIX }}{{ row.REPLACE_NAME }} {{ row.REPLACE_SURNAME }}</td>
+            <td>{{ row.MASTER_PREFIX }}{{ row.MASTER_NAME }} {{ row.MASTER_SURNAME }}</td>
             <td></td>
           </tr>
           </tbody>
@@ -511,6 +545,17 @@ export class CheckScheduleComponent implements OnInit {
   selectedCourse: any = null;
   displayDialog: boolean = false;
   substituteTeacher: string | null = null;
+  substituteNote: string | null = null;
+  customNote: string | null = null;
+  // ✅ ตัวเลือกหมายเหตุ
+  substituteNoteOptions: string[] = [
+    'ติดราชการ',
+    'ลาป่วย',
+    'ลากิจ',
+    'อบรม/สัมมนา',
+    'อื่น ๆ'
+  ];
+
 
   protected readonly environment = environment;
   displayReportDialog: boolean = false;
@@ -694,14 +739,40 @@ export class CheckScheduleComponent implements OnInit {
   saveSubstitute() {
     if (!this.substituteTeacher || !this.selectedCourse) return;
 
+    // ตรวจสอบหมายเหตุ
+    if (!this.substituteNote) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'ระบุเหตุผล',
+        detail: 'กรุณาเลือกหมายเหตุ',
+        life: 3000
+      });
+      return;
+    }
+
+    // ถ้าเลือก "อื่น ๆ" ต้องกรอก customNote
+    if (this.substituteNote === 'อื่น ๆ' && !this.customNote?.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'ระบุเหตุผล',
+        detail: 'กรุณาระบุหมายเหตุสำหรับ "อื่น ๆ"',
+        life: 3000
+      });
+      return;
+    }
+
+    const noteToSave = this.substituteNote === 'อื่น ๆ' ? this.customNote : this.substituteNote;
+
     const payload = {
       STAFFIDMASTER: this.selectedCourse.officer.STAFFID,
       STAFFIDREPLACE: this.substituteTeacher,
-      timeslot: this.selectedCourse.slot.TIMESLOTID,
+      TIMESLOTID: this.selectedCourse.slot.TIMESLOTID,
       course: this.selectedCourse.course,
       day: this.selectedDay.name,
-      CLASSID: this.selectedCourse.classid
+      CLASSID: this.selectedCourse.classid,
+      NOTE: noteToSave // ✅ เพิ่มหมายเหตุ
     };
+
     console.log('ส่งข้อมูลไปบันทึก:', payload);
     this.officerService.addOfficerreplce(payload).subscribe({
       next: () => {
@@ -713,19 +784,23 @@ export class CheckScheduleComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Error saving officer:', err);
+       console.error('Error saving officer:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'ผิดพลาด',
           detail: err?.error?.message || 'เกิดข้อผิดพลาดในการบันทึก',
-          life: 5000
+          life: 3000
         });
       }
     });
 
+    // รีเซ็ตค่าหลังบันทึก
     this.displayDialog = false;
     this.substituteTeacher = null;
+    this.substituteNote = null;
+    this.customNote = null;
   }
+
 
   getThaiDate(date: Date): string {
     const day = date.getDate();

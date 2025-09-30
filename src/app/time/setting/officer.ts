@@ -18,13 +18,15 @@ import { TableModule } from 'primeng/table';
 import { Table } from 'primeng/table';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { environment } from '../../../../../environments/environment';
+import { Textarea } from 'primeng/textarea';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-officer',
   standalone: true,
   imports: [
     CommonModule, FormsModule, Select, ButtonModule, Dialog, HttpClientModule,
-    Toast, IconField, InputIcon, InputText, TableModule, ConfirmDialog
+    Toast, IconField, InputIcon, InputText, TableModule, ConfirmDialog, Textarea, DropdownModule
   ],
   template: `
     <p-toast></p-toast>
@@ -110,8 +112,22 @@ import { environment } from '../../../../../environments/environment';
           stateStorage="session"
           stateKey="statedemo-session"
         >
+          <!-- Caption -->
           <ng-template #caption>
-            <div class="flex">
+            <div class="flex justify-between items-center">
+              <!-- ปุ่มเพิ่ม -->
+              <div class="flex justify-content-end my-4">
+                <p-button
+                  label="เพิ่มรายการใหม่"
+                  icon="pi pi-plus"
+                  severity="success"
+                  [disabled]="!selectedYear || !selectedTerm"
+                  (click)="showAddDialog()"
+                  styleClass="p-button-wide"
+                ></p-button>
+              </div>
+
+              <!-- ช่องค้นหา -->
               <p-iconfield iconPosition="left" class="ml-auto">
                 <p-inputicon>
                   <i class="pi pi-search"></i>
@@ -126,6 +142,7 @@ import { environment } from '../../../../../environments/environment';
             </div>
           </ng-template>
 
+          <!-- Header -->
           <ng-template pTemplate="header">
             <tr>
               <th pSortableColumn="STAFFCODE">รหัสเจ้าหน้าที่ <p-sortIcon field="STAFFCODE" /></th>
@@ -133,17 +150,20 @@ import { environment } from '../../../../../environments/environment';
               <th pSortableColumn="STAFFSERNAME">นามสกุล <p-sortIcon field="STAFFSERNAME" /></th>
               <th pSortableColumn="ACADYEAR">ปีการศึกษา <p-sortIcon field="ACADYEAR" /></th>
               <th pSortableColumn="SEMESTER">ภาคเรียน <p-sortIcon field="SEMESTER" /></th>
+              <th>หมายเหตุ</th>
               <th>การดำเนินการ</th>
             </tr>
           </ng-template>
 
+          <!-- Body -->
           <ng-template pTemplate="body" let-officer>
             <tr [pSelectableRow]="officer">
               <td>{{ officer.STAFFCODE }}</td>
-              <td>{{ officer.STAFFNAME }}</td>
+              <td>{{ officer.PREFIXID }}{{ officer.STAFFNAME }}</td>
               <td>{{ officer.STAFFSERNAME }}</td>
               <td>{{ officer.ACADYEAR }}</td>
               <td>{{ officer.SEMESTER }}</td>
+              <td>{{ officer.REMARK }}</td>
               <td>
                 <p-button
                   icon="pi pi-trash"
@@ -154,24 +174,103 @@ import { environment } from '../../../../../environments/environment';
             </tr>
           </ng-template>
 
+          <!-- Empty message -->
           <ng-template pTemplate="emptymessage">
             <tr>
               <td colspan="6" class="text-center py-12">
                 <div class="flex flex-col items-center justify-center gap-4">
                   <i class="pi pi-calendar-times text-6xl text-gray-300"></i>
                   <span class="text-2xl font-semibold text-gray-500">
-                    ไม่พบข้อมูลผู้สอน
-                  </span>
+            ไม่พบข้อมูลผู้สอน
+          </span>
                   <span class="text-gray-400 text-sm">
-                    กรุณาเพิ่มข้อมูลผู้สอน
-                  </span>
+            กรุณาเพิ่มข้อมูลผู้สอน
+          </span>
                 </div>
               </td>
             </tr>
           </ng-template>
         </p-table>
+
       </div>
     </div>
+    <!-- Dialog สำหรับเพิ่มรายการ -->
+    <p-dialog
+      header="เพิ่มข้อมูลเจ้าหน้าที่"
+      [(visible)]="displayAddDialog"
+      [modal]="true"
+      [style]="{ width: '450px' }"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="p-dialog-rounded"
+    >
+      <div class="p-fluid">
+        <div class="grid formgrid gap-4 p-4">
+          <div class="col-12 md:col-6">
+            <label for="prefix" class="block font-semibold mb-2 text-gray-700">คำนำหน้า</label>
+            <p-dropdown
+              id="prefix"
+              [options]="prefixes"
+              [(ngModel)]="newOfficer.prefix"
+              placeholder="เลือกคำนำหน้า"
+              [style]="{ width: '100%' }"
+            ></p-dropdown>
+          </div>
+
+          <div class="col-12 md:col-6">
+            <label for="firstName" class="block font-semibold mb-2 text-gray-700">ชื่อ</label>
+            <input
+              id="firstName"
+              pInputText
+              type="text"
+              [(ngModel)]="newOfficer.firstName"
+              class="w-full"
+            />
+          </div>
+
+          <div class="col-12">
+            <label for="lastName" class="block font-semibold mb-2 text-gray-700">นามสกุล</label>
+            <input
+              id="lastName"
+              pInputText
+              type="text"
+              [(ngModel)]="newOfficer.lastName"
+              class="w-full"
+            />
+          </div>
+
+          <div class="col-12">
+            <label for="note" class="block font-semibold mb-2 text-gray-700">หมายเหตุ</label>
+            <textarea
+              id="note"
+              pInputTextarea
+              rows="3"
+              [(ngModel)]="newOfficer.note"
+              class="w-full"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+          <p-button
+            label="ยกเลิก"
+            icon="pi pi-times"
+            (click)="displayAddDialog = false"
+            severity="secondary"
+            [text]="true"
+          ></p-button>
+          <p-button
+            label="บันทึก"
+            icon="pi pi-check"
+            (click)="saveNewOfficer()"
+            severity="success"
+            [raised]="true"
+          ></p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
   `,
   providers: [MessageService, ConfirmationService]
 })
@@ -188,6 +287,23 @@ export class OfficerComponent implements OnInit {
   currentOfficers: OfficerModel[] = [];
   selectedOfficer?: OfficerhrmModel & { fullName: string };
   selectedTableOfficer?: OfficerModel;
+
+  // ตัวแปร Dialog กรณีสร้างรายการใหท่
+  displayAddDialog = false;
+  // ตัวแปรเก็บฟอร์มใหม่
+  newOfficer = {
+    prefix: '',
+    firstName: '',
+    lastName: '',
+    note: ''
+  };
+
+// คำนำหน้า
+  prefixes = [
+    { label: 'นาย', value: 'นาย' },
+    { label: 'นาง', value: 'นาง' },
+    { label: 'นางสาว', value: 'นางสาว' }
+  ];
 
   constructor(
     private http: HttpClient,
@@ -209,6 +325,58 @@ export class OfficerComponent implements OnInit {
       (!this.selectedTerm || String(off.SEMESTER) === String(this.selectedTerm))
     );
   }
+
+// เปิด Dialog
+  showAddDialog() {
+    this.newOfficer = { prefix: '', firstName: '', lastName: '', note: '' };
+    this.displayAddDialog = true;
+  }
+
+  // บันทึกข้อมูลใหม่
+  saveNewOfficer() {
+    if (!this.newOfficer.prefix || !this.newOfficer.firstName || !this.newOfficer.lastName) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'กรอกไม่ครบ',
+        detail: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        life: 3000
+      });
+      return;
+    }
+    const payload: Partial<OfficerModel> = {
+      PREFIXID: this.newOfficer.prefix,
+      STAFFNAME: this.newOfficer.firstName,
+      STAFFSERNAME: this.newOfficer.lastName,
+      NOTE: this.newOfficer.note,
+      ACADYEAR: this.selectedYear,
+      SEMESTER: this.selectedTerm,
+      STAFFID_HRM: "0"
+
+    };
+    console.log(payload)
+    this.officerService.addOfficer(payload).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'สำเร็จ',
+          detail: 'เพิ่มเจ้าหน้าที่เรียบร้อยแล้ว',
+          life: 3000
+        });
+        this.getOfficers();
+        this.displayAddDialog = false;
+      },
+      error: (err) => {
+        console.error('Error saving officer:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'ผิดพลาด',
+          detail: err?.error?.message || 'เกิดข้อผิดพลาดในการบันทึก',
+          life: 5000
+        });
+      }
+    });
+  }
+
 
 
   onFilterChange() {
@@ -360,4 +528,6 @@ export class OfficerComponent implements OnInit {
   }
 
   protected readonly environment = environment;
+
+
 }

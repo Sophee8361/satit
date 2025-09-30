@@ -32,6 +32,17 @@ export default [
     data: {breadcrumb: 'ตารางสอน'}
   },
   {
+    path: 'staffschedule',
+    loadComponent: () => import('./report/staffschedule').then((c) => c.StaffscheduleComponent),
+    data: {breadcrumb: 'ตารางสอนคุณครู'}
+  },
+  {
+    path: 'examschedule',
+    loadComponent: () => import('./examschedule').then((c) => c.ExamScheduleComponent),
+    data: {breadcrumb: 'ตารางสอนคุณครู'}
+  },
+
+  {
     path: 'repplacschedule',
     loadComponent: () => import('./chekschedule').then((c) => c.CheckScheduleComponent),
     data: {breadcrumb: 'ตารางสอนแทน'}

@@ -29,6 +29,8 @@ import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { Fluid } from 'primeng/fluid';
 import { Tooltip } from 'primeng/tooltip';
+import { OfficerModel } from '../service/model/officer.model';
+import { OfficerService } from '../service/officer.service';
 
 @Component({
   selector: 'app-time',
@@ -52,12 +54,10 @@ import { Tooltip } from 'primeng/tooltip';
   providers: [MessageService, ConfirmationService],
   template: `
     <p-toast position="top-right" key="t1"></p-toast>
-
     <div class="card p-6 shadow-lg rounded-xl space-y-6">
     <div class="font-semibold text-xl mb-4 text-gray-800">ตารางสอน</div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div>
+    <div class="flex flex-wrap items-center gap-4 mt-6">
+      <div class="flex-1 min-w-[150px]">
         <label class="block font-semibold mb-2 text-gray-700">ปีการศึกษา</label>
         <p-select
           [options]="years"
@@ -69,7 +69,7 @@ import { Tooltip } from 'primeng/tooltip';
         ></p-select>
       </div>
 
-      <div>
+      <div class="flex-1 min-w-[150px]">
         <label class="block font-semibold mb-2 text-gray-700">ภาคเรียน</label>
         <p-select
           [options]="terms"
@@ -80,49 +80,34 @@ import { Tooltip } from 'primeng/tooltip';
           (onChange)="onFilterChange()"
         ></p-select>
       </div>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-4 mt-6">
-      <div class="flex-1 min-w-[150px]">
-        <label class="block font-semibold mb-2 text-gray-700">ระดับ</label>
-        <p-select
-          [options]="levels"
-          [(ngModel)]="selectedLevel"
-          placeholder="เลือกระดับ"
-          optionLabel="name"
-          [showClear]="true"
-          class="w-full"
-          (onChange)="onLevelChange()"
-        ></p-select>
-      </div>
 
       <div class="flex-1 min-w-[150px]">
-        <label class="block font-semibold mb-2 text-gray-700">ชั้นเรียน</label>
+        <label class="block font-semibold mb-2 text-gray-700">ครูผู้สอน</label>
         <p-select
-          [options]="filteredClasses"
-          [(ngModel)]="selectedClass"
-          placeholder="เลือกชั้นเรียน"
-          optionLabel="name"
+          [options]="officers"
+          [(ngModel)]="Teacher"
+          optionLabel="FULLNAME"
+          placeholder="ผู้สอน"
           [showClear]="true"
-          [disabled]="!selectedLevel"
-          class="w-full"
-          (onChange)="onClassChange()"
-        ></p-select>
+          [filter]="true"
+          [disabled]="!selectedYear || !selectedTerm"
+          class="w-full">
+        </p-select>
+
+
+        <!--        <p-dropdown-->
+<!--          [options]="officers"-->
+<!--          optionLabel="FULLNAME"-->
+<!--          optionValue="STAFFID"-->
+<!--          [filter]="true"-->
+<!--          [(ngModel)]="substituteTeacher"-->
+<!--          placeholder="เลือกผู้สอนแทน"-->
+<!--          styleClass="w-full"-->
+<!--          filterPlaceholder="ค้นหาผู้สอน..."-->
+<!--          [showClear]="true"-->
+<!--        ></p-dropdown>-->
       </div>
 
-      <div class="flex-1 min-w-[150px]">
-        <label class="block font-semibold mb-2 text-gray-700">ห้อง</label>
-        <p-select
-          [options]="rooms"
-          [(ngModel)]="selectedRoom"
-          placeholder="เลือกห้อง"
-          optionLabel="name"
-          [showClear]="true"
-          [disabled]="!selectedLevel"
-          class="w-full"
-          (onChange)="onClassChange()"
-        ></p-select>
-      </div>
 
       <div class="flex-none mt-6">
         <p-button
@@ -133,7 +118,7 @@ import { Tooltip } from 'primeng/tooltip';
           [loading]="isLoadingSubmit"
           severity="secondary"
           (click)="onSubmit()"
-          [disabled]="!selectedLevel || !selectedClass || !selectedRoom || !selectedYear || !selectedTerm"
+          [disabled]="!selectedYear || !selectedTerm"
         ></p-button>
 
         <!-- ปุ่มล้างค่าทั้งหมด -->
@@ -149,18 +134,18 @@ import { Tooltip } from 'primeng/tooltip';
     </div>
 
     <div class="overflow-x-auto mt-4">
-<!--      <p-button-->
-<!--        label="พิมพ์ PDF"-->
-<!--        icon="pi pi-print"-->
-<!--        (click)="printPDF()"-->
-<!--        severity="info"-->
-<!--        [disabled]="!ScheduleData || ScheduleData.length === 0">-->
-<!--      </p-button>-->
       <p-button
-        label="พิมพ์ตาราง"
+        label="พิมพ์ PDF"
+        icon="pi pi-print"
+        (click)="printPDF()"
+        severity="info"
+        [disabled]="!ScheduleData || ScheduleData.length === 0">
+      </p-button>
+      <p-button
+        label="พิมพ์ตาราง (Window Print)"
         icon="pi pi-print"
         (click)="printWindow()"
-        severity="info"
+        severity="success"
         class="ml-2"
         [disabled]="!ScheduleData || ScheduleData.length === 0">
       </p-button>
@@ -232,14 +217,15 @@ import { Tooltip } from 'primeng/tooltip';
     `
   ]
 })
-export class ScheduleComponent implements OnInit {
+export class StaffscheduleComponent implements OnInit {
   currentYear = new Date().getFullYear() + 543;
   years: number[] = [this.currentYear, this.currentYear + 1];
   terms: string[] = ['1', '2', 'Summer'];
   selectedYear?: string;
   selectedTerm?: string;
-  levels = LEVELS;
-  classes = CLASSES;
+  officers: OfficerModel[] = [];
+  Teacher: OfficerModel | null = null;
+
   filteredClasses: Class[] = [];
   selectedLevel?: Level;
   selectedClass?: Class;
@@ -253,6 +239,7 @@ export class ScheduleComponent implements OnInit {
   isLoadingClear = false;
 
   constructor(
+    private officerService: OfficerService,
     private ScheduleService: ScheduleService,
     private http: HttpClient,
     private messageService: MessageService,
@@ -261,6 +248,20 @@ export class ScheduleComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSlot();
+    this.getOfficers()
+  }
+
+  getOfficers() {
+    this.officerService.getOfficers().subscribe({
+      next: res => (this.officers = res),
+      error: () =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'ผิดพลาด',
+          detail: 'โหลดผู้สอนไม่สำเร็จ',
+          life: 5000
+        })
+    });
   }
 
   loadSlot() {
@@ -276,25 +277,19 @@ export class ScheduleComponent implements OnInit {
   }
 
   onFilterChange() { this.ScheduleData = []; this.cd.markForCheck(); }
-
-  onLevelChange() {
-    this.filteredClasses = this.selectedLevel ? this.classes.filter(c => c.levelCode === this.selectedLevel!.code) : [];
-    this.selectedClass = undefined;
-    this.selectedRoom = undefined;
-    this.ScheduleData = [];
-    this.cd.markForCheck();
-  }
-
   onClassChange() { this.ScheduleData = []; this.cd.markForCheck(); }
 
   onSubmit() {
-    if (!this.selectedYear || !this.selectedTerm || !this.selectedClass || !this.selectedRoom) return;
+    if (!this.selectedYear || !this.selectedTerm) return;
+    const teacherId = this.Teacher?.STAFFID || null;
+    const teacherName = this.Teacher?.FULLNAME || '-';
+    alert(`คุณครูผู้สอน: ${teacherName} (ID: ${teacherId})`);
 
-    this.ScheduleService.getSchedule({
+    this.ScheduleService.getStaffSchedule({
       year: this.selectedYear,
       term: this.selectedTerm,
-      class: this.selectedClass?.code,
-      room: this.selectedRoom?.code
+      teacherId: teacherId
+
     }).subscribe({
       next: (res) => {
         this.ScheduleData = res;
@@ -482,7 +477,7 @@ export class ScheduleComponent implements OnInit {
   <body>
     <h2>โรงเรียนสาธิตมหาวิทยาลัยราชภัฏยะลา</h2>
     <h3>
-      ตารางเรียน<br>
+      ตารางสอน<br>
       ปีการศึกษา: ${this.selectedYear || '-'} | ภาคเรียน: ${this.selectedTerm || '-'}<br>
       ระดับ: ${this.selectedLevel?.name || '-'} | ${this.selectedClass?.name || '-'} | ${this.selectedRoom?.name || '-'}
     </h3>
@@ -527,13 +522,4 @@ export class ScheduleComponent implements OnInit {
       });
     }
   }
-
-
-
-
-
-
-
-
-
 }

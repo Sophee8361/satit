@@ -2,6 +2,7 @@
 import { Level, Class, Day,Room} from '../service/slot.model';
 
 
+
 export const LEVELS: Level[] = [
   { name: 'ระดับประถม', code: 'PRIMARY' },
   { name: 'ระดับมัธยม', code: 'SECONDARY' }

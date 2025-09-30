@@ -126,6 +126,11 @@ export class AppMenu {
           routerLink: ['/time/repplacschedule']
         },
         {
+          label: 'จัดตารางสอบ',
+          icon: 'pi pi-calendar',   // 📅 เหมาะกับการวางตารางสอน
+          routerLink: ['/time/examschedule']
+        },
+        {
           label: 'รายงาน',
           icon: 'pi pi-fw pi-chart-bar', // Changed from pi-envelope
           items: [
@@ -133,6 +138,11 @@ export class AppMenu {
               label: 'ตารางสอน',
               icon: 'pi pi-calendar', // Changed from pi-time-edit
               routerLink: ['/time/schedule']
+            },
+            {
+              label: 'ตารางสอนคุณครู',
+              icon: 'pi pi-calendar', // Changed from pi-time-edit
+              routerLink: ['/time/staffschedule']
             }
           ]
         },

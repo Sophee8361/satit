@@ -12,10 +12,11 @@ export interface OfficerModel {
   PREFIXID: string;
   STAFFNAME: string;
   STAFFSERNAME: string;
-  STAFFID_HRM: string;
+  STAFFID_HRM?: string | number; // เพิ่ม number
   ACADYEAR: string;
   SEMESTER: string;
   FULLNAME: string;
+  NOTE: string;
 }
 
 export interface OfficerreplaceModel {

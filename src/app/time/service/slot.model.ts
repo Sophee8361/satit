@@ -2,7 +2,8 @@ export interface SlotModel {
   NO: string;
   TIMESLOTID: string;
   SLOTFROM: string;
-  SLOTTO: string
+  SLOTTO: string;
+  TYPE: string;
 }
 
 // Interface สำหรับผู้สอน (ใช้ City เดิมได้)
@@ -78,10 +79,7 @@ export interface Day {
   id: number;
 }
 
-export interface Room {
-  name: string,
-  code: string
-}
+
 
 export interface ClassStructure {
   id: string;
